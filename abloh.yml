@@ -1,0 +1,20 @@
+# abloh.yml - read from the PR merge base, so changes are reviewed like code.
+# Keys: https://abloh.dev/docs#policy
+
+# % of mechanical breaks in changed lines your tests must catch.
+threshold: 70
+
+# true: below threshold fails the check. Blocks merges only if also marked
+# required in branch protection.
+enforce: true
+
+# Rebuild recipe for the proof container. Comments name the source file.
+environment:
+  runtimeImage: "node:22.23.1-bookworm-slim@sha256:6c74791e557ce11fc957704f6d4fe134a7bc8d6f5ca4403205b2966bd488f6b3"  # reviewed Node 22 image (your CI's own Node, node >=18.0.0 in package.json, and a .nvmrc chooses)
+  runtimes:        # pinned runtimes added to the proof image, installed at build time
+    # bun.lock selects bun, which the Node proof image does not carry
+    - "bun"
+  installDirectory: "."
+  setup: ".abloh/setup.sh"     # written by init and yours to edit. Every cold run executes it step by step
+  testCommand: "bun run test"  # scripts.test in package.json
+  # no sealedTestCommand - your test script fans out to other commands rather than running a test runner, so Abloh has none to invoke on its own. Name the way one suite is run here and proposed tests are proved with that.
